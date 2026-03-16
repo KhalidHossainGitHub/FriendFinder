@@ -10,6 +10,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -123,7 +124,7 @@ public class MinimapRenderer {
     private void sampleBlock(World world, int x, int z,
                              int[][] colorOut, int[][] heightOut, int ci, int cj) {
         try {
-            int topY = world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z) - 1;
+            int topY = world.getTopY(Heightmap.Type.WORLD_SURFACE, x, z) - 1;
             if (topY < world.getBottomY()) {
                 colorOut[ci][cj] = 0;
                 heightOut[ci][cj] = world.getBottomY();
@@ -141,9 +142,7 @@ public class MinimapRenderer {
             heightOut[ci][cj] = topY;
 
             if (!state.getFluidState().isEmpty()) {
-                MapColor mc = state.getMapColor(world, pos);
-                if (mc == MapColor.CLEAR) { colorOut[ci][cj] = 0; return; }
-                int base = 0xFF000000 | mc.color;
+                int base = 0xFF000000 | BiomeColors.getWaterColor(world, pos);
 
                 int depth = 0;
                 for (int dy = topY - 1; dy >= world.getBottomY() && depth < 24; dy--) {
@@ -159,8 +158,6 @@ public class MinimapRenderer {
             MapColor mc = state.getMapColor(world, pos);
             if (mc == MapColor.CLEAR) { colorOut[ci][cj] = 0; return; }
 
-            // For foliage on top of transparent blocks (like grass on ravine edge),
-            // peek below to see if there's a significant gap underneath
             if (state.getBlock() == Blocks.GRASS_BLOCK || state.getBlock() == Blocks.SHORT_GRASS
                     || state.getBlock() == Blocks.TALL_GRASS || state.getBlock() == Blocks.FERN) {
                 BlockState below = world.getBlockState(new BlockPos(x, topY - 1, z));
@@ -184,6 +181,8 @@ public class MinimapRenderer {
                         return;
                     }
                 }
+                colorOut[ci][cj] = 0xFF000000 | BiomeColors.getGrassColor(world, pos);
+                return;
             }
 
             colorOut[ci][cj] = 0xFF000000 | mc.color;

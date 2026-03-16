@@ -1,6 +1,5 @@
 package com.friendfinder.radar;
 
-import com.friendfinder.config.FriendFinderConfig;
 import com.friendfinder.util.PlayerTracker;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
@@ -18,7 +17,6 @@ public class FriendRadarRenderer {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null || mc.world == null || mc.currentScreen != null) return;
 
-        int range = FriendFinderConfig.getInstance().radarRange;
         int screenW = mc.getWindow().getScaledWidth();
         float playerYaw = mc.player.getYaw();
 
@@ -30,7 +28,7 @@ public class FriendRadarRenderer {
             double dz = target.getZ() - mc.player.getZ();
             double dist = Math.sqrt(dx * dx + dz * dz);
 
-            if (dist > range || dist < 5) continue;
+            if (dist < 5) continue;
 
             double angleToTarget = Math.toDegrees(Math.atan2(-dx, dz));
             double relAngle = normalizeAngle(angleToTarget - playerYaw);

@@ -6,9 +6,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
+
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ServerInfo;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -41,8 +45,24 @@ public class MapDataManager {
     private int saveTimer;
 
     public static MapDataManager getInstance() {
-        if (instance == null) instance = new MapDataManager();
+        if (instance == null) {
+            instance = new MapDataManager();
+            cleanupStaleCache();
+        }
         return instance;
+    }
+
+    private static void cleanupStaleCache() {
+        Path stale = BASE_DIR.resolve("unknown");
+        if (Files.exists(stale)) {
+            try {
+                try (var entries = Files.list(stale)) {
+                    entries.forEach(f -> { try { Files.deleteIfExists(f); } catch (IOException ignored) {} });
+                }
+                Files.deleteIfExists(stale);
+                FriendFinderMod.LOGGER.info("Cleaned up stale 'unknown' map cache");
+            } catch (IOException ignored) {}
+        }
     }
 
     // ── tick (called every client tick from FriendFinderMod) ─────────────
@@ -67,6 +87,7 @@ public class MapDataManager {
             dimension = dim;
             explored.clear();
             load();
+            FriendFinderMod.LOGGER.info("Map world ID resolved to: {} (dim: {})", worldId, dimension);
         }
 
         tickCounter++;
@@ -94,6 +115,7 @@ public class MapDataManager {
         if (!world.isChunkLoaded(cx, cz)) return null;
 
         int[] colors = sampleChunk(world, cx, cz);
+        if (colors == null) return null;
         explored.put(key, colors);
         dirty = true;
         return colors;
@@ -122,8 +144,11 @@ public class MapDataManager {
                     if (explored.containsKey(k)) continue;
                     if (!world.isChunkLoaded(cx, cz)) continue;
 
-                    explored.put(k, sampleChunk(world, cx, cz));
-                    dirty = true;
+                    int[] colors = sampleChunk(world, cx, cz);
+                    if (colors != null) {
+                        explored.put(k, colors);
+                        dirty = true;
+                    }
                     scanned++;
                 }
             }
@@ -142,7 +167,7 @@ public class MapDataManager {
             for (int lz = 0; lz < 16; lz++) {
                 int wx = bx + lx, wz = bz + lz, idx = lx + lz * 16;
                 try {
-                    int topY = world.getTopY(Heightmap.Type.MOTION_BLOCKING, wx, wz) - 1;
+                    int topY = world.getTopY(Heightmap.Type.WORLD_SURFACE, wx, wz) - 1;
                     if (topY < world.getBottomY()) continue;
 
                     BlockPos pos = new BlockPos(wx, topY, wz);
@@ -152,15 +177,14 @@ public class MapDataManager {
                     heights[idx] = topY;
 
                     if (!st.getFluidState().isEmpty()) {
-                        MapColor mc = st.getMapColor(world, pos);
-                        if (mc == MapColor.CLEAR) continue;
+                        int waterBase = 0xFF000000 | BiomeColors.getWaterColor(world, pos);
                         int depth = 0;
                         for (int dy = topY - 1; dy >= world.getBottomY() && depth < 24; dy--) {
                             BlockState b = world.getBlockState(new BlockPos(wx, dy, wz));
                             if (b.getFluidState().isEmpty() && !b.isAir()) break;
                             depth++;
                         }
-                        colors[idx] = shade(0xFF000000 | mc.color,
+                        colors[idx] = shade(waterBase,
                                 Math.max(0.5f, 1.0f - depth * 0.03f));
                         any = true;
                         continue;
@@ -188,6 +212,9 @@ public class MapDataManager {
                                 continue;
                             }
                         }
+                        colors[idx] = 0xFF000000 | BiomeColors.getGrassColor(world, pos);
+                        any = true;
+                        continue;
                     }
 
                     colors[idx] = 0xFF000000 | mc.color;
@@ -196,7 +223,7 @@ public class MapDataManager {
             }
         }
 
-        if (!any) return colors;
+        if (!any) return null;
 
         int[] shaded = new int[256];
         for (int lx = 0; lx < 16; lx++) {
@@ -235,7 +262,7 @@ public class MapDataManager {
     // ── persistence (GZIP-compressed binary, per world + dimension) ──────
 
     private void save() {
-        if (worldId.isEmpty() || dimension.isEmpty()) return;
+        if (worldId.isEmpty() || "unknown".equals(worldId) || dimension.isEmpty()) return;
         try {
             Path dir = BASE_DIR.resolve(sanitize(worldId));
             Files.createDirectories(dir);
@@ -261,6 +288,7 @@ public class MapDataManager {
     }
 
     private void load() {
+        if ("unknown".equals(worldId)) return;
         Path file = BASE_DIR.resolve(sanitize(worldId))
                 .resolve(sanitize(dimension) + ".dat");
         if (!Files.exists(file)) return;
@@ -288,11 +316,21 @@ public class MapDataManager {
     // ── utils ────────────────────────────────────────────────────────────
 
     private static String resolveWorldId(MinecraftClient client) {
-        if (client.getCurrentServerEntry() != null) {
-            return client.getCurrentServerEntry().address;
+        ServerInfo entry = client.getCurrentServerEntry();
+        if (entry != null && entry.address != null && !entry.address.isEmpty()) {
+            return "mp_" + entry.address;
         }
+
+        ClientPlayNetworkHandler netHandler = client.getNetworkHandler();
+        if (netHandler != null) {
+            ServerInfo netInfo = netHandler.getServerInfo();
+            if (netInfo != null && netInfo.address != null && !netInfo.address.isEmpty()) {
+                return "mp_" + netInfo.address;
+            }
+        }
+
         if (client.isIntegratedServerRunning() && client.getServer() != null) {
-            return client.getServer().getSaveProperties().getLevelName();
+            return "sp_" + client.getServer().getSaveProperties().getLevelName();
         }
         return "unknown";
     }
