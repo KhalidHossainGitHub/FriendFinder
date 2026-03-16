@@ -4,7 +4,7 @@ A Minecraft Fabric client mod for **1.21.1** that helps players navigate multipl
 
 Built with Fabric API, Java 21, and Gradle 8.8.
 
-**Live Demo:** [Watch the demo video](https://youtube.com/your-video-link)
+**Live Demo:** [FriendFinder Demo Tutorial](https://youtu.be/-OV0D6llraw)
 
 ---
 
@@ -12,8 +12,10 @@ Built with Fabric API, Java 21, and Gradle 8.8.
 
 ### 1. Circular HUD Minimap
 - Rotating minimap pinned to the top-right corner of the HUD
+- **Biome-accurate** terrain — grass, foliage, and water colors reflect the actual biome (snowy tundra looks brown/white, jungles are deep green, warm oceans are turquoise, etc.)
 - Height-shaded terrain with water depth coloring and ravine detection
 - Compares block heights to neighbours (like vanilla cartography maps) so hills, cliffs, and ravines are clearly visible
+- Snow layers and other surface blocks properly rendered via `WORLD_SURFACE` heightmap
 - Shows nearby players (green), waypoints (teal), and pings (per-player color)
 - Compass labels (N/S/E/W) rotate with the player's yaw
 - Terrain cache that rebuilds only when the player moves blocks
@@ -27,8 +29,8 @@ Built with Fabric API, Java 21, and Gradle 8.8.
 ### 2. Persistent World Map (M key)
 - Full-screen map with a Minecraft filled-map-inspired parchment border
 - **Persistent exploration** — terrain is recorded in the background as you walk. Pan back to areas you visited hours ago and the map is still there
-- Data saved per server/world and per dimension as compressed binary files
-- Height-shaded terrain, water depth, ravine-aware foliage piercing
+- Data saved **per server/world** (isolated by server address or world name) and **per dimension** as compressed binary files
+- Biome-accurate terrain colors, height shading, water depth, ravine-aware foliage piercing
 - Scroll to zoom (1:1 to 1:16), zoom focuses toward cursor position
 - Click-and-drag to pan, M or Escape to close
 - Subtle coordinate grid that adapts to zoom level
@@ -82,8 +84,7 @@ A single tabbed GUI opened with P. Click the tabs to switch between **Waypoints*
 - Indicators pinned to the **top edge** of the screen for every nearby player
 - Position along the top reflects the player's relative direction — left of screen means the player is to your left, right means to your right
 - Shows player name and distance in meters
-- Always visible regardless of where you're looking
-- Configurable range (default 200 blocks)
+- Always visible regardless of where you're looking or how far away players are (no range limit)
 
 <p align="center">
   <img width="932" alt="Friend Radar" src="public\friendRadar.png">
@@ -128,7 +129,6 @@ Settings are stored in `.minecraft/config/friendfinder/config.json`:
 {
   "minimapSize": 120,
   "minimapMargin": 10,
-  "radarRange": 200,
   "waypointVisible": true,
   "pingDurationSeconds": 30
 }
@@ -141,9 +141,11 @@ Settings are stored in `.minecraft/config/friendfinder/config.json`:
 ### Terrain Rendering
 The minimap and world map both use a **height-difference hillshading** algorithm inspired by vanilla Minecraft cartography. Each block's height is compared to its north and west neighbours — higher blocks are brightened, lower blocks are darkened. This creates the visual depth that makes ravines appear as dark gashes and mountains have bright ridgelines.
 
-**Ravine detection** was a specific challenge: Minecraft's `MOTION_BLOCKING` heightmap can report a grass block at the top of a ravine edge, making it look like flat terrain. The solution is to peek below foliage blocks (grass, ferns) — if the block underneath is air, the renderer scans downward to find the actual solid surface and uses that block's color and height instead.
+**Biome-accurate coloring** uses Minecraft's `BiomeColors` API — `getGrassColor()` for grass/foliage and `getWaterColor()` for water — so terrain looks correct per biome (brown/grey in snowy tundra, deep green in jungles, turquoise in warm oceans). Both the minimap and world map use the `WORLD_SURFACE` heightmap, which correctly includes thin snow layers that `MOTION_BLOCKING` would skip.
 
-**Water depth** is handled by scanning downward from the surface through fluid blocks and darkening the blue proportionally (up to 24 blocks deep).
+**Ravine detection** was a specific challenge: the heightmap can report a grass block at the top of a ravine edge, making it look like flat terrain. The solution is to peek below foliage blocks (grass, ferns) — if the block underneath is air, the renderer scans downward to find the actual solid surface and uses that block's color and height instead.
+
+**Water depth** is handled by scanning downward from the surface through fluid blocks and darkening the biome water color proportionally (up to 24 blocks deep).
 
 ### Persistent Map Data
 The world map uses a `MapDataManager` that runs in the background every tick, scanning up to 8 newly loaded chunks every 0.5 seconds using a spiral pattern outward from the player. Chunk color data is stored in a `HashMap<Long, int[]>` keyed by packed chunk coordinates.
@@ -151,6 +153,8 @@ The world map uses a `MapDataManager` that runs in the background every tick, sc
 Persistence uses **GZIP-compressed binary files** — one per dimension per server/world. Each chunk stores 256 ARGB color values (16x16 blocks). Data auto-saves every ~2 minutes and on disconnect/dimension change. A typical exploration session of 10,000 chunks uses about 2–4 MB on disk.
 
 The world map screen itself does no sampling — it reads entirely from the `MapDataManager` cache, using a `lastCX/lastCZ` optimization to avoid redundant HashMap lookups for blocks in the same chunk.
+
+Server/world identification uses multiple fallback methods (`getCurrentServerEntry`, `getNetworkHandler().getServerInfo()`, integrated server level name) to ensure each server and singleplayer world gets its own isolated map data — no cross-server contamination. Chunks that fail to sample (e.g. still loading on the client) are retried automatically on subsequent scan cycles rather than being cached as empty.
 
 **Trade-off vs. full-featured map mods:** Mods like Xaero's Minimap or JourneyMap achieve real-time dynamic updating through GPU texture atlases, multi-threaded sampling, block-change event hooks, and LOD systems — thousands of lines of rendering infrastructure. FriendFinder takes a simpler approach: snapshot chunks on first visit, persist them, and accept that terrain changes won't auto-reflect on already-cached areas. This keeps the codebase lightweight (~1,700 lines total) while still providing a fully functional persistent map.
 
