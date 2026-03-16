@@ -86,7 +86,7 @@ public class FriendFinderMenuScreen extends Screen {
 
                 addDrawableChild(ButtonWidget.builder(Text.literal("Teleport"),
                         btn -> teleportToWaypoint(wp))
-                        .dimensions(panelR - 94, ey + 6, 36, 20).build());
+                        .dimensions(panelR - 114, ey + 6, 56, 20).build());
 
                 addDrawableChild(ButtonWidget.builder(Text.literal("Delete"),
                         btn -> {

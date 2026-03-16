@@ -4,73 +4,105 @@ A Minecraft Fabric client mod for **1.21.1** that helps players navigate multipl
 
 Built with Fabric API, Java 21, and Gradle 8.8.
 
+<p align="center">
+  <img width="932" alt="FriendFinder Preview" src="public\friendfinder-preview.png">
+  <br>
+  <b>Figure 1: FriendFinder In-Game Preview</b>
+</p>
+
 ---
 
 ## Features
 
-### Circular HUD Minimap
-- Rotating minimap pinned to the top-right corner
+### 1. Circular HUD Minimap
+- Rotating minimap pinned to the top-right corner of the HUD
 - Height-shaded terrain with water depth coloring and ravine detection
 - Compares block heights to neighbours (like vanilla cartography maps) so hills, cliffs, and ravines are clearly visible
 - Shows nearby players (green), waypoints (teal), and pings (per-player color)
 - Compass labels (N/S/E/W) rotate with the player's yaw
 - Terrain cache that rebuilds only when the player moves blocks
 
-### Persistent World Map (M key)
+<p align="center">
+  <img width="932" alt="Minimap" src="public\friendfinder-preview.png">
+  <br>
+  <b>Figure 2: Circular HUD Minimap</b>
+</p>
+
+### 2. Persistent World Map (M key)
 - Full-screen map with a Minecraft filled-map-inspired parchment border
 - **Persistent exploration** — terrain is recorded in the background as you walk. Pan back to areas you visited hours ago and the map is still there
-- Data saved per server/world and per dimension as compressed binary files in `.minecraft/config/friendfinder/maps/`
+- Data saved per server/world and per dimension as compressed binary files
 - Height-shaded terrain, water depth, ravine-aware foliage piercing
-- Scroll to zoom (1:1 to 1:16), zoom focuses toward cursor
+- Scroll to zoom (1:1 to 1:16), zoom focuses toward cursor position
 - Click-and-drag to pan, M or Escape to close
 - Subtle coordinate grid that adapts to zoom level
 - Bottom info bar: player position, cursor world-coordinates, zoom level
 - Cardinal labels, crosshair, and control hints overlay
 - Waypoints, players, and pings rendered on top of terrain
 
-### Waypoint System
-- **GUI (P key → Waypoints tab):** type a name, click "+ Add Here" to save your current position. Each waypoint shows coordinates, dimension, with TP and Delete buttons
-- **Commands (still available):**
+<p align="center">
+  <img width="932" alt="World Map" src="public\friendfinder-preview.png">
+  <br>
+  <b>Figure 3: Persistent World Map</b>
+</p>
+
+### 3. FriendFinder Menu (P key)
+A single tabbed GUI opened with P. Click the tabs to switch between **Waypoints** and **Friends**.
+
+<p align="center">
+  <img width="932" alt="FriendFinder Menu" src="public\friendfinder-preview.png">
+  <br>
+  <b>Figure 4: FriendFinder Menu — Waypoints Tab</b>
+</p>
+
+#### Waypoints Tab
+- Type a name and click **"+ Add Here"** to save your current position (or press Enter)
+- Scrollable list showing each waypoint's name, coordinates, and dimension
+- **Teleport** and **Delete** buttons per entry
+- Waypoints persist between sessions in `config/friendfinder/waypoints.json`
+- Visible on the minimap, world map, and as 3D billboarded labels floating in the world
+- Filtered by dimension (Overworld / Nether / End)
+- Commands also available:
   ```
   /waypoint add <name>       Save current position
   /waypoint remove <name>    Delete a waypoint
   /waypoint list             Show all with distance
   /waypoint teleport <name>  TP to waypoint (requires server permission)
   ```
-- Waypoints persist in `config/friendfinder/waypoints.json`
-- Visible on the minimap, world map, and as 3D billboarded labels in the world
-- Filtered by dimension (Overworld/Nether/End)
 
-### Unified Menu (P key)
-A single tabbed GUI with two tabs you switch between by clicking:
+#### Friends Tab
+- Lists all online players with their Minecraft skin head icons
+- One-click **Teleport** buttons (sends `/tp <player>` to server)
+- Scrollable for large player lists
+- Shows player count
 
-| Tab | Contents |
-|-----|----------|
-| **Waypoints** | Name input + "Add Here", scrollable list with TP/Delete per entry |
-| **Friends** | Online player list with skin heads and Teleport buttons |
-
-Press P to open, P or Escape to close. Enter submits a new waypoint while the text field is focused.
-
-### Directional Friend Radar (always on)
+### 4. Friend Radar (always on)
 - Indicators pinned to the **top edge** of the screen for every nearby player
-- Position along the top reflects the player's relative direction (left = to your left, right = to your right)
+- Position along the top reflects the player's relative direction — left of screen means the player is to your left, right means to your right
 - Shows player name and distance in meters
 - Always visible regardless of where you're looking
 - Configurable range (default 200 blocks)
 
-### Friend Ping System (G key)
+<p align="center">
+  <img width="932" alt="Friend Radar" src="public\friendfinder-preview.png">
+  <br>
+  <b>Figure 5: Friend Radar — Top-of-Screen Indicators</b>
+</p>
+
+### 5. Ping Beacon (G key)
 - Press G to mark your current location for teammates
-- **Beacon beam** — a translucent colored beam extends from the ping to the sky, visible from far away
+- **Beacon beam** — a translucent colored beam extends from the ping location to the sky, visible from far away
 - **Per-player colors** — each player's pings have a unique, consistent color generated from their username
 - Pings appear on the minimap, world map, as 3D beams in the world, and in chat
 - Auto-fade after 30 seconds with a 5-second transparency ramp
-- **Multiplayer sync** — when the mod is on the server, pings broadcast to all players with the mod. Falls back to local-only on vanilla servers
+- **Multiplayer sync** — when the mod is installed on the server, pings broadcast to all players with the mod. Falls back to local-only on vanilla servers
 - Server-side rate limiting: 1 ping per 3 seconds per player
 
-### 3D Waypoint Labels
-- Billboarded text labels floating in the world at each waypoint position
-- Show waypoint name and distance, visible through blocks
-- Scale with distance for readability
+<p align="center">
+  <img width="932" alt="Ping Beacon" src="public\friendfinder-preview.png">
+  <br>
+  <b>Figure 6: Ping Beacon with Per-Player Colors</b>
+</p>
 
 ---
 
