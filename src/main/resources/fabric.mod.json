@@ -1,0 +1,36 @@
+{
+    "schemaVersion": 1,
+    "id": "friendfinder",
+    "version": "${version}",
+
+    "name": "FriendFinder",
+    "description": "A multiplayer navigation mod to help players locate friends and important locations.",
+    "authors": [
+        "Khalid"
+    ],
+    "contact": {},
+    "license": "MIT",
+    "environment": "*",
+
+    "entrypoints": {
+        "main": [
+            "com.friendfinder.FriendFinderInit"
+        ],
+        "client": [
+            "com.friendfinder.FriendFinderMod"
+        ]
+    },
+
+    "mixins": [],
+
+    "depends": {
+        "fabricloader": ">=0.15.0",
+        "minecraft": "~1.21.1",
+        "java": ">=21",
+        "fabric-api": "*"
+    },
+
+    "suggests": {
+        "modmenu": "*"
+    }
+}
