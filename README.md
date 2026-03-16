@@ -4,6 +4,8 @@ A Minecraft Fabric client mod for **1.21.1** that helps players navigate multipl
 
 Built with Fabric API, Java 21, and Gradle 8.8.
 
+**Live Demo:** [Watch the demo video](https://youtube.com/your-video-link)
+
 <p align="center">
   <img width="932" alt="FriendFinder Preview" src="public\friendfinder-preview.png">
   <br>
@@ -49,12 +51,6 @@ Built with Fabric API, Java 21, and Gradle 8.8.
 ### 3. FriendFinder Menu (P key)
 A single tabbed GUI opened with P. Click the tabs to switch between **Waypoints** and **Friends**.
 
-<p align="center">
-  <img width="932" alt="FriendFinder Menu" src="public\friendfinder-preview.png">
-  <br>
-  <b>Figure 4: FriendFinder Menu — Waypoints Tab</b>
-</p>
-
 #### Waypoints Tab
 - Type a name and click **"+ Add Here"** to save your current position (or press Enter)
 - Scrollable list showing each waypoint's name, coordinates, and dimension
@@ -70,11 +66,23 @@ A single tabbed GUI opened with P. Click the tabs to switch between **Waypoints*
   /waypoint teleport <name>  TP to waypoint (requires server permission)
   ```
 
+<p align="center">
+  <img width="932" alt="FriendFinder Waypoints Tab" src="public\friendfinder-preview.png">
+  <br>
+  <b>Figure 4: FriendFinder Menu — Waypoints Tab</b>
+</p>
+
 #### Friends Tab
 - Lists all online players with their Minecraft skin head icons
 - One-click **Teleport** buttons (sends `/tp <player>` to server)
 - Scrollable for large player lists
 - Shows player count
+
+<p align="center">
+    <img width="932" alt="FriendFinder Waypoints Tab" src="public\friendfinder-preview.png">
+    <br>
+    <b>Figure 4: FriendFinder Menu — Waypoints Tab</b>
+</p>
 
 ### 4. Friend Radar (always on)
 - Indicators pinned to the **top edge** of the screen for every nearby player
