@@ -6,12 +6,6 @@ Built with Fabric API, Java 21, and Gradle 8.8.
 
 **Live Demo:** [Watch the demo video](https://youtube.com/your-video-link)
 
-<p align="center">
-  <img width="932" alt="FriendFinder Preview" src="public\friendfinder-preview.png">
-  <br>
-  <b>Figure 1: FriendFinder In-Game Preview</b>
-</p>
-
 ---
 
 ## Features
@@ -25,9 +19,9 @@ Built with Fabric API, Java 21, and Gradle 8.8.
 - Terrain cache that rebuilds only when the player moves blocks
 
 <p align="center">
-  <img width="932" alt="Minimap" src="public\friendfinder-preview.png">
+  <img width="932" alt="Minimap" src="public\minimap.png">
   <br>
-  <b>Figure 2: Circular HUD Minimap</b>
+  <b>Figure 1: Circular HUD Minimap</b>
 </p>
 
 ### 2. Persistent World Map (M key)
@@ -43,9 +37,9 @@ Built with Fabric API, Java 21, and Gradle 8.8.
 - Waypoints, players, and pings rendered on top of terrain
 
 <p align="center">
-  <img width="932" alt="World Map" src="public\friendfinder-preview.png">
+  <img width="932" alt="World Map" src="public\worldmap.png">
   <br>
-  <b>Figure 3: Persistent World Map</b>
+  <b>Figure 2: Persistent World Map</b>
 </p>
 
 ### 3. FriendFinder Menu (P key)
@@ -67,9 +61,9 @@ A single tabbed GUI opened with P. Click the tabs to switch between **Waypoints*
   ```
 
 <p align="center">
-  <img width="932" alt="FriendFinder Waypoints Tab" src="public\friendfinder-preview.png">
+  <img width="932" alt="Waypoints Tab" src="public\waypointsTab.png">
   <br>
-  <b>Figure 4: FriendFinder Menu — Waypoints Tab</b>
+  <b>Figure 3: FriendFinder Menu — Waypoints Tab</b>
 </p>
 
 #### Friends Tab
@@ -79,9 +73,9 @@ A single tabbed GUI opened with P. Click the tabs to switch between **Waypoints*
 - Shows player count
 
 <p align="center">
-    <img width="932" alt="FriendFinder Waypoints Tab" src="public\friendfinder-preview.png">
+    <img width="932" alt="Teleport to Friends Tab" src="public\TeleportFriendsTab.png">
     <br>
-    <b>Figure 4: FriendFinder Menu — Waypoints Tab</b>
+    <b>Figure 4: FriendFinder Menu — Friend Teleport Tab</b>
 </p>
 
 ### 4. Friend Radar (always on)
@@ -92,7 +86,7 @@ A single tabbed GUI opened with P. Click the tabs to switch between **Waypoints*
 - Configurable range (default 200 blocks)
 
 <p align="center">
-  <img width="932" alt="Friend Radar" src="public\friendfinder-preview.png">
+  <img width="932" alt="Friend Radar" src="public\friendRadar.png">
   <br>
   <b>Figure 5: Friend Radar — Top-of-Screen Indicators</b>
 </p>
@@ -107,7 +101,7 @@ A single tabbed GUI opened with P. Click the tabs to switch between **Waypoints*
 - Server-side rate limiting: 1 ping per 3 seconds per player
 
 <p align="center">
-  <img width="932" alt="Ping Beacon" src="public\friendfinder-preview.png">
+  <img width="932" alt="Ping Beacon" src="public\pingBeacon.png">
   <br>
   <b>Figure 6: Ping Beacon with Per-Player Colors</b>
 </p>
